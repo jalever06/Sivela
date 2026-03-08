@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sivela - Simple Digital Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/9HVWdY9W/Sivela.png">
+    <style>
+        :root {
+            --bg: #faf8f5;
+            --card: #ffffff;
+            --text: #5a5a5a;
+            --text-light: #999;
+            --accent: #a8d5ba;
+            --accent-dark: #8fc9a3;
+            --border: #e8e4df;
+            --purple-soft: #d4c4e0;
+            --pink-soft: #f4c2c2;
+            --blue-soft: #b8d4e3;
+            --female: #f4c2e0;
+            --male: #b8d4f0;
+        }
+
+        [data-theme="dark"] {
+            --bg: #2d2d2d;
+            --card: #3a3a3a;
+            --text: #e0e0e0;
+            --text-light: #888;
+            --accent: #6b9b7a;
+            --accent-dark: #5a8a69;
+            --border: #4a4a4a;
+            --purple-soft: #8a7a96;
+            --pink-soft: #a67a7a;
+            --blue-soft: #6a8a9a;
+            --female: #a67a8a;
+            --male: #6a8aaa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Bolitas flotantes */
+        .floating-circles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .f-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .f-circle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            left: 10%;
+            top: 30%;
+            background: var(--accent);
+            animation-delay: 0s;
+        }
+
+        .f-circle:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            right: 15%;
+            top: 20%;
+            animation-delay: -5s;
+            background: var(--blue-soft);
+        }
+
+        .f-circle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            left: 70%;
+            top: 60%;
+            animation-delay: -10s;
+            background: var(--purple-soft);
+        }
+
+        .f-circle:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            left: 30%;
+            top: 70%;
+            animation-delay: -15s;
+            background: var(--pink-soft);
+        }
+
+        .f-circle:nth-child(5) {
+            width: 50px;
+            height: 50px;
+            right: 25%;
+            top: 45%;
+            animation-delay: -8s;
+            background: var(--accent);
+        }
+
+        .f-circle:nth-child(6) {
+            width: 70px;
+            height: 70px;
+            left: 5%;
+            top: 80%;
+            animation-delay: -12s;
+            background: var(--blue-soft);
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) translateX(0); 
+                opacity: 0.1;
+            }
+            25% { 
+                transform: translateY(-30px) translateX(15px); 
+                opacity: 0.25;
+            }
+            50% { 
+                transform: translateY(15px) translateX(-15px); 
+                opacity: 0.15;
+            }
+            75% { 
+                transform: translateY(-20px) translateX(10px); 
+                opacity: 0.2;
+            }
+        }
+
+        /* Selector de idioma desplegable */
+        .lang-dropdown {
+            position: relative;
+            z-index: 100;
+        }
+
+        .lang-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'Quicksand', sans-serif;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .lang-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            min-width: 140px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .lang-menu.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .lang-option:hover {
+            background: var(--bg);
+            transform: translateX(5px);
+        }
+
+        .lang-option.active {
+            background: var(--accent);
+            color: #2d2d2d;
+        }
+
+        .flag {
+            font-size: 20px;
+        }
+
+        .top-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'Quicksand', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        .logo {
+            width: 90px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .brand-name {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 56px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--card);
+            padding: 5px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #2d2d2d;
+            box-shadow: 0 2px 10px rgba(168, 213, 186, 0.3);
+        }
+
+        .tab:hover:not(.active) {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(5px);
+        }
+
+        .select-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .symbol {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 700;
+            color: var(--accent-dark);
+            font-size: 18px;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        #amount {
+            padding: 15px 15px 15px 50px;
+            font-size: 24px;
+        }
+
+        .results {
+            display: grid;
+            gap: 10px;
+        }
+
+        .result-item {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .result-item:hover {
+            transform: translateX(5px);
+            border-color: var(--accent);
+        }
+
+        .result-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .result-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-dark);
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .rate-info {
+            margin-top: 15px;
+            font-size: 11px;
+            color: var(--text-light);
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .calc-display {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: right;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            min-height: 70px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 15px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .calc-btn:hover {
+            background: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .calc-btn.operator {
+            background: var(--purple-soft);
+            color: #2d2d2d;
+        }
+
+        .calc-btn.equals {
+            background: var(--accent);
+            color: #2d2d2d;
+            grid-column: span 2;
+            aspect-ratio: auto;
+        }
+
+        .calc-btn.clear {
+            background: var(--pink-soft);
+            color: #2d2d2d;
+        }
+
+        .gender-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .gender-btn {
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .gender-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .gender-btn.active.female {
+            background: var(--female);
+            border-color: var(--female);
+            color: #2d2d2d;
+        }
+
+        .gender-btn.active.male {
+            background: var(--male);
+            border-color: var(--male);
+            color: #2d2d2d;
+        }
+
+        .gender-icon {
+            font-size: 24px;
+        }
+
+        .imc-inputs {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .imc-result {
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            color: #2d2d2d;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .imc-result.female {
+            background: linear-gradient(135deg, var(--female) 0%, var(--pink-soft) 100%);
+        }
+
+        .imc-result.male {
+            background: linear-gradient(135deg, var(--male) 0%, var(--blue-soft) 100%);
+        }
+
+        .imc-number {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .imc-category {
+            font-size: 20px;
+            font-weight: 600;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .ideal-weight {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .imc-scale {
+            display: grid;
+            gap: 8px;
+        }
+
+        .scale-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .scale-item.active {
+            opacity: 1;
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .scale-bajo { background: #b8d4e3; color: #2d5a7b; }
+        .scale-normal { background: #a8d5ba; color: #2d5a3f; }
+        .scale-sobrepeso { background: #f9e4b7; color: #8a6d3b; }
+        .scale-obeso { background: #f4c2c2; color: #8a3b3b; }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 12px;
+        }
+
+        .retry-btn {
+            background: var(--accent);
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            font-size: 11px;
+            margin-top: 5px;
+            color: white;
+        }
+
+        .info-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .info-box strong {
+            color: var(--text);
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 600;
+            z-index: 1;
+            padding: 20px;
+        }
+
+        .footer .year {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .footer .copyright {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Bolitas flotantes -->
+    <div class="floating-circles">
+        <div class="f-circle"></div>
+        <div class="f-circle"></div>
+        <div class="f-circle"></div>
+        <div class="f-circle"></div>
+        <div class="f-circle"></div>
+        <div class="f-circle"></div>
+    </div>
+
+    <div class="top-controls">
+        <!-- Selector de idioma desplegable -->
+        <div class="lang-dropdown">
+            <button class="lang-btn" onclick="toggleLangMenu()">
+                <span id="currentFlag">🇻🇪</span>
+                <span id="currentLangCode">ES</span>
+                <span>▼</span>
+            </button>
+            <div class="lang-menu" id="langMenu">
+                <div class="lang-option active" onclick="selectLanguage('es')" id="optEs">
+                    <span class="flag">🇻🇪</span>
+                    <span>Español</span>
+                </div>
+                <div class="lang-option" onclick="selectLanguage('en')" id="optEn">
+                    <span class="flag">🇺🇸</span>
+                    <span>English</span>
+                </div>
+            </div>
+        </div>
+        <button class="control-btn" onclick="toggleTheme()">🌙</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <img src="https://i.ibb.co/9HVWdY9W/Sivela.png" alt="Sivela" class="logo">
+            <div class="brand-name">Sivela</div>
+        </div>
+        <div class="subtitle" id="subtitle">Tu conversor digital rápido y simple. 🚀</div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('divisas')" id="tabDivisas">💱 Divisas</button>
+            <button class="tab" onclick="showTab('calc')" id="tabCalc">🔢 Calc</button>
+            <button class="tab" onclick="showTab('imc')" id="tabImc">⚖️ IMC</button>
+        </div>
+
+        <!-- SECCIÓN DIVISAS -->
+        <div id="divisas" class="section active">
+            <div class="card">
+                <div class="select-group">
+                    <label id="labelConvert">Convertir de</label>
+                    <select id="fromCurrency" onchange="changeCurrency()">
+                        <option value="VES">🇻🇪 Bolívares (VES)</option>
+                        <option value="USD">🇺🇸 Dólares (USD)</option>
+                        <option value="PEN">🇵🇪 Soles (PEN)</option>
+                        <option value="BRL">🇧🇷 Reales (BRL)</option>
+                        <option value="COP">🇨🇴 Pesos Colombianos (COP)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label id="labelAmount">Monto</label>
+                    <div class="input-wrapper">
+                        <span class="symbol" id="inputSymbol">Bs.</span>
+                        <input type="number" id="amount" placeholder="0.00" oninput="convertCurrency()">
+                    </div>
+                </div>
+
+                <div class="results" id="results">
+                    <div class="result-item">
+                        <span class="result-label">🇺🇸 USD</span>
+                        <span class="result-value" id="resUSD">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🇻🇪 VES</span>
+                        <span class="result-value" id="resVES">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🇵🇪 PEN</span>
+                        <span class="result-value" id="resPEN">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🇧🇷 BRL</span>
+                        <span class="result-value" id="resBRL">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🇨🇴 COP</span>
+                        <span class="result-value" id="resCOP">-</span>
+                    </div>
+                </div>
+
+                <div class="rate-info" id="rateInfo">
+                    <span class="loading"></span> <span id="loadingText">Cargando tasas...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN CALCULADORA -->
+        <div id="calc" class="section">
+            <div class="card">
+                <div class="calc-display" id="calcDisplay">0</div>
+                <div class="calc-buttons">
+                    <button class="calc-btn clear" onclick="clearCalc()">C</button>
+                    <button class="calc-btn" onclick="appendCalc('(')">(</button>
+                    <button class="calc-btn" onclick="appendCalc(')')">)</button>
+                    <button class="calc-btn operator" onclick="appendCalc('/')">÷</button>
+                    
+                    <button class="calc-btn" onclick="appendCalc('7')">7</button>
+                    <button class="calc-btn" onclick="appendCalc('8')">8</button>
+                    <button class="calc-btn" onclick="appendCalc('9')">9</button>
+                    <button class="calc-btn operator" onclick="appendCalc('*')">×</button>
+                    
+                    <button class="calc-btn" onclick="appendCalc('4')">4</button>
+                    <button class="calc-btn" onclick="appendCalc('5')">5</button>
+                    <button class="calc-btn" onclick="appendCalc('6')">6</button>
+                    <button class="calc-btn operator" onclick="appendCalc('-')">−</button>
+                    
+                    <button class="calc-btn" onclick="appendCalc('1')">1</button>
+                    <button class="calc-btn" onclick="appendCalc('2')">2</button>
+                    <button class="calc-btn" onclick="appendCalc('3')">3</button>
+                    <button class="calc-btn operator" onclick="appendCalc('+')">+</button>
+                    
+                    <button class="calc-btn" onclick="appendCalc('0')">0</button>
+                    <button class="calc-btn" onclick="appendCalc('.')">.</button>
+                    <button class="calc-btn" onclick="deleteLast()">⌫</button>
+                    <button class="calc-btn equals" onclick="calculate()">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN IMC -->
+        <div id="imc" class="section">
+            <div class="card">
+                <label id="labelGender">Selecciona tu género</label>
+                <div class="gender-selector">
+                    <button class="gender-btn female" onclick="selectGender('female')" id="btnFemale">
+                        <span class="gender-icon">♀️</span>
+                        <span id="textFemale">Mujer</span>
+                    </button>
+                    <button class="gender-btn male" onclick="selectGender('male')" id="btnMale">
+                        <span class="gender-icon">♂️</span>
+                        <span id="textMale">Hombre</span>
+                    </button>
+                </div>
+
+                <div class="imc-inputs">
+                    <div>
+                        <label id="labelWeight">Peso (kg)</label>
+                        <input type="number" id="peso" placeholder="Ej: 70" step="0.1" oninput="calcularIMC()">
+                    </div>
+                    <div>
+                        <label id="labelHeight">Altura (cm)</label>
+                        <input type="number" id="altura" placeholder="Ej: 170" step="1" oninput="calcularIMC()">
+                    </div>
+                </div>
+
+                <div class="imc-result" id="imcResult" style="display: none;">
+                    <div style="font-size: 14px; opacity: 0.9;" id="textYourBMI">Tu IMC es:</div>
+                    <div class="imc-number" id="imcValor">0</div>
+                    <div class="imc-category" id="imcCategoria">-</div>
+                    <div class="ideal-weight" id="idealWeight"></div>
+                </div>
+
+                <div class="imc-scale">
+                    <div class="scale-item scale-bajo" id="scale-bajo">
+                        <span id="textLow">Bajo peso</span>
+                        <span>&lt; 18.5</span>
+                    </div>
+                    <div class="scale-item scale-normal" id="scale-normal">
+                        <span id="textNormal">Peso normal</span>
+                        <span>18.5 - 24.9</span>
+                    </div>
+                    <div class="scale-item scale-sobrepeso" id="scale-sobrepeso">
+                        <span id="textOver">Sobrepeso</span>
+                        <span>25 - 29.9</span>
+                    </div>
+                    <div class="scale-item scale-obeso" id="scale-obeso">
+                        <span id="textObese">Obesidad</span>
+                        <span>≥ 30</span>
+                    </div>
+                </div>
+
+                <div class="info-box" id="infoBox">
+                    <strong>💡 <span id="textNote">Nota:</span></strong> <span id="textInfo">El IMC es una medida general. Las mujeres suelen tener mayor porcentaje de grasa corporal saludable que los hombres. Selecciona tu género para una interpretación más precisa de tu resultado.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="year">2026</div>
+        <div class="copyright" id="copyright">© Sivela. Todos los derechos reservados.</div>
+    </div>
+
+    <script>
+        // ==========================================
+        // VARIABLES GLOBALES SEPARADAS POR MÓDULO
+        // ==========================================
+        
+        // Variables de idioma
+        let currentLang = 'es';
+        
+        // Variables de divisas (aisladas)
+        const currencyState = {
+            rates: {},
+            bcvRate: null,
+            retryCount: 0,
+            lastFetch: null
+        };
+
+        // Variables de IMC (aisladas)
+        const imcState = {
+            selectedGender: null
+        };
+
+        // Variables de calculadora (aisladas)
+        const calcState = {
+            expression: ''
+        };
+
+        // Símbolos de monedas
+        const currencySymbols = {
+            'VES': 'Bs.',
+            'USD': '$',
+            'PEN': 'S/',
+            'BRL': 'R$',
+            'COP': '$'
+        };
+
+        // ==========================================
+        // TRADUCCIONES
+        // ==========================================
+        const translations = {
+            es: {
+                subtitle: "Tu conversor digital rápido y simple. 🚀",
+                tabDivisas: "💱 Divisas",
+                tabCalc: "🔢 Calc",
+                tabImc: "⚖️ IMC",
+                labelConvert: "Convertir de",
+                labelAmount: "Monto",
+                loadingText: "Cargando tasas...",
+                labelGender: "Selecciona tu género",
+                textFemale: "Mujer",
+                textMale: "Hombre",
+                labelWeight: "Peso (kg)",
+                labelHeight: "Altura (cm)",
+                textYourBMI: "Tu IMC es:",
+                textLow: "Bajo peso",
+                textNormal: "Peso normal",
+                textOver: "Sobrepeso",
+                textObese: "Obesidad",
+                textNote: "Nota:",
+                textInfo: "El IMC es una medida general. Las mujeres suelen tener mayor porcentaje de grasa corporal saludable que los hombres. Selecciona tu género para una interpretación más precisa de tu resultado.",
+                categories: {
+                    low: 'Bajo peso',
+                    normal: 'Peso normal',
+                    over: 'Sobrepeso',
+                    obese: 'Obesidad'
+                },
+                idealWeight: {
+                    excellent: '¡Excelente! Mantén tu estilo de vida',
+                    consult: 'Consulta a un profesional de salud',
+                    ideal: 'Peso ideal: ~'
+                },
+                copyright: "© Sivela. Todos los derechos reservados.",
+                placeholders: {
+                    weight: "Ej: 70",
+                    height: "Ej: 170"
+                },
+                rateLabels: {
+                    bcv: 'Tasa BCV',
+                    updated: 'Actualizado',
+                    retrying: 'Reintentando',
+                    error: 'Error de conexión',
+                    retry: 'Reintentar'
+                }
+            },
+            en: {
+                subtitle: "Your fast and simple digital converter. 🚀",
+                tabDivisas: "💱 Currency",
+                tabCalc: "🔢 Calc",
+                tabImc: "⚖️ BMI",
+                labelConvert: "Convert from",
+                labelAmount: "Amount",
+                loadingText: "Loading rates...",
+                labelGender: "Select your gender",
+                textFemale: "Woman",
+                textMale: "Man",
+                labelWeight: "Weight (kg)",
+                labelHeight: "Height (cm)",
+                textYourBMI: "Your BMI is:",
+                textLow: "Underweight",
+                textNormal: "Normal weight",
+                textOver: "Overweight",
+                textObese: "Obesity",
+                textNote: "Note:",
+                textInfo: "BMI is a general measure. Women naturally have a higher percentage of essential body fat (hormones, reproduction). Select your gender for a more accurate interpretation of your result.",
+                categories: {
+                    low: 'Underweight',
+                    normal: 'Normal weight',
+                    over: 'Overweight',
+                    obese: 'Obesity'
+                },
+                idealWeight: {
+                    excellent: 'Excellent! Keep up your lifestyle',
+                    consult: 'Consult a health professional',
+                    ideal: 'Ideal weight: ~'
+                },
+                copyright: "© Sivela. All rights reserved.",
+                placeholders: {
+                    weight: "Ex: 70",
+                    height: "Ex: 170"
+                },
+                rateLabels: {
+                    bcv: 'BCV Rate',
+                    updated: 'Updated',
+                    retrying: 'Retrying',
+                    error: 'Connection error',
+                    retry: 'Retry'
+                }
+            }
+        };
+
+        // ==========================================
+        // FUNCIONES DE IDIOMA
+        // ==========================================
+        function toggleLangMenu() {
+            document.getElementById('langMenu').classList.toggle('show');
+        }
+
+        function selectLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', currentLang);
+            
+            document.getElementById('optEs').classList.toggle('active', lang === 'es');
+            document.getElementById('optEn').classList.toggle('active', lang === 'en');
+            document.getElementById('currentFlag').textContent = lang === 'es' ? '🇻🇪' : '🇺🇸';
+            document.getElementById('currentLangCode').textContent = lang === 'es' ? 'ES' : 'EN';
+            
+            document.getElementById('langMenu').classList.remove('show');
+            
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLang];
+            
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('tabDivisas').textContent = t.tabDivisas;
+            document.getElementById('tabCalc').textContent = t.tabCalc;
+            document.getElementById('tabImc').textContent = t.tabImc;
+            document.getElementById('labelConvert').textContent = t.labelConvert;
+            document.getElementById('labelAmount').textContent = t.labelAmount;
+            document.getElementById('loadingText').textContent = t.loadingText;
+            document.getElementById('labelGender').textContent = t.labelGender;
+            document.getElementById('textFemale').textContent = t.textFemale;
+            document.getElementById('textMale').textContent = t.textMale;
+            document.getElementById('labelWeight').textContent = t.labelWeight;
+            document.getElementById('labelHeight').textContent = t.labelHeight;
+            document.getElementById('textYourBMI').textContent = t.textYourBMI;
+            document.getElementById('textLow').textContent = t.textLow;
+            document.getElementById('textNormal').textContent = t.textNormal;
+            document.getElementById('textOver').textContent = t.textOver;
+            document.getElementById('textObese').textContent = t.textObese;
+            document.getElementById('textNote').textContent = t.textNote;
+            document.getElementById('textInfo').textContent = t.textInfo;
+            document.getElementById('copyright').textContent = t.copyright;
+            
+            document.getElementById('peso').placeholder = t.placeholders.weight;
+            document.getElementById('altura').placeholder = t.placeholders.height;
+            
+            // Actualizar tasas si ya están cargadas
+            if (currencyState.bcvRate) {
+                updateRateInfo();
+            }
+            
+            // Actualizar IMC si hay datos
+            if (imcState.selectedGender) {
+                calcularIMC();
+            }
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.lang-dropdown');
+            if (!dropdown.contains(event.target)) {
+                document.getElementById('langMenu').classList.remove('show');
+            }
+        });
+
+        // ==========================================
+        // FUNCIONES DE TEMA
+        // ==========================================
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.removeItem('theme');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE TABS
+        // ==========================================
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // ==========================================
+        // FUNCIONES DE DIVISAS (AISLADAS)
+        // ==========================================
+        function changeCurrency() {
+            const curr = document.getElementById('fromCurrency').value;
+            document.getElementById('inputSymbol').textContent = currencySymbols[curr];
+            convertCurrency();
+        }
+
+        async function fetchWithTimeout(url, timeout = 5000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (error) {
+                clearTimeout(id);
+                throw error;
+            }
+        }
+
+        async function fetchBCVRate() {
+            const urls = [
+                'https://bcv-api.rafnixg.dev/v1/exchange-rates/latest/USD',
+                'https://ve.dolarapi.com/v1/dolares/oficial'
+            ];
+
+            for (let url of urls) {
+                try {
+                    const res = await fetchWithTimeout(url);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (data.rate) return parseFloat(data.rate);
+                    if (data.promedio) return parseFloat(data.promedio);
+                } catch (e) { continue; }
+            }
+            throw new Error('BCV fetch failed');
+        }
+
+        async function fetchGlobalRates() {
+            const apis = [
+                'https://api.exchangerate-api.com/v4/latest/USD',
+                'https://api.frankfurter.app/latest?from=USD'
+            ];
+
+            for (let api of apis) {
+                try {
+                    const res = await fetchWithTimeout(api);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (data.rates) return data.rates;
+                } catch (e) { continue; }
+            }
+            throw new Error('Global rates fetch failed');
+        }
+
+        function updateRateInfo() {
+            const t = translations[currentLang];
+            const infoDiv = document.getElementById('rateInfo');
+            
+            if (!currencyState.bcvRate) {
+                infoDiv.innerHTML = `<span class="loading"></span> ${t.loadingText}`;
+                return;
+            }
+            
+            const locale = currentLang === 'es' ? 'es-VE' : 'en-US';
+            const timeStr = new Date().toLocaleTimeString(locale, {hour: '2-digit', minute:'2-digit'});
+            
+            infoDiv.innerHTML = `
+                ✅ ${t.rateLabels.bcv}: 1 USD = ${currencyState.bcvRate.toLocaleString(locale, {maximumFractionDigits: 2})} VES<br>
+                <small>${t.rateLabels.updated}: ${timeStr}</small>
+            `;
+        }
+
+        async function fetchRates() {
+            const t = translations[currentLang];
+            const infoDiv = document.getElementById('rateInfo');
+            
+            try {
+                updateRateInfo();
+                
+                // Fetch ambas APIs en paralelo
+                const [bcvData, globalData] = await Promise.all([
+                    fetchBCVRate(),
+                    fetchGlobalRates()
+                ]);
+                
+                currencyState.bcvRate = bcvData;
+                currencyState.rates = globalData;
+                currencyState.rates['VES'] = bcvData; // Agregar VES a las tasas
+                currencyState.retryCount = 0;
+                currencyState.lastFetch = new Date();
+                
+                updateRateInfo();
+                convertCurrency();
+                
+            } catch (error) {
+                console.error('Fetch error:', error);
+                currencyState.retryCount++;
+                
+                if (currencyState.retryCount < 3) {
+                    infoDiv.innerHTML = `<span class="error">⚠️ ${t.rateLabels.retrying}... (${currencyState.retryCount}/3)</span>`;
+                    setTimeout(fetchRates, 2000 * currencyState.retryCount);
+                } else {
+                    infoDiv.innerHTML = `
+                        <span class="error">❌ ${t.rateLabels.error}</span><br>
+                        <button class="retry-btn" onclick="fetchRates()">${t.rateLabels.retry}</button>
+                    `;
+                }
+            }
+        }
+
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const from = document.getElementById('fromCurrency').value;
+            
+            // Resetear resultados si no hay monto
+            if (amount === 0) {
+                ['USD', 'VES', 'PEN', 'BRL', 'COP'].forEach(c => {
+                    document.getElementById('res' + c).textContent = '-';
+                    document.getElementById('res' + c).style.color = 'var(--text-light)';
+                });
+                return;
+            }
+
+            // Verificar que tenemos tasas
+            if (!currencyState.bcvRate || !currencyState.rates['PEN']) {
+                return;
+            }
+
+            // Convertir a USD primero
+            let inUSD;
+            if (from === 'VES') {
+                inUSD = amount / currencyState.bcvRate;
+            } else if (from === 'USD') {
+                inUSD = amount;
+            } else {
+                inUSD = amount / currencyState.rates[from];
+            }
+
+            // Calcular todas las conversiones
+            const conversions = {
+                'USD': inUSD,
+                'VES': inUSD * currencyState.bcvRate,
+                'PEN': inUSD * currencyState.rates['PEN'],
+                'BRL': inUSD * currencyState.rates['BRL'],
+                'COP': inUSD * currencyState.rates['COP']
+            };
+
+            // Mostrar resultados
+            const locale = currentLang === 'es' ? 'es-VE' : 'en-US';
+            
+            for (let [curr, val] of Object.entries(conversions)) {
+                const el = document.getElementById('res' + curr);
+                if (curr === from) {
+                    el.textContent = '-';
+                    el.style.color = 'var(--text-light)';
+                } else {
+                    const formatted = (curr === 'VES' || curr === 'COP') ? 
+                        val.toLocaleString(locale, {maximumFractionDigits: 2, minimumFractionDigits: 2}) :
+                        val.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+                    el.textContent = formatted;
+                    el.style.color = 'var(--accent-dark)';
+                }
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE CALCULADORA (AISLADAS)
+        // ==========================================
+        function updateCalcDisplay() {
+            document.getElementById('calcDisplay').textContent = calcState.expression || '0';
+        }
+
+        function appendCalc(value) {
+            calcState.expression += value;
+            updateCalcDisplay();
+        }
+
+        function clearCalc() {
+            calcState.expression = '';
+            updateCalcDisplay();
+        }
+
+        function deleteLast() {
+            calcState.expression = calcState.expression.slice(0, -1);
+            updateCalcDisplay();
+        }
+
+        function calculate() {
+            try {
+                if (!calcState.expression) return;
+                let expr = calcState.expression.replace(/×/g, '*').replace(/−/g, '-');
+                const result = eval(expr);
+                calcState.expression = String(result);
+                updateCalcDisplay();
+            } catch (e) {
+                document.getElementById('calcDisplay').textContent = 'Error';
+                setTimeout(() => {
+                    calcState.expression = '';
+                    updateCalcDisplay();
+                }, 1000);
+            }
+        }
+
+        // Teclado para calculadora
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('calc').classList.contains('active')) return;
+            
+            if (/[0-9+\-*/.()]/.test(e.key)) appendCalc(e.key);
+            if (e.key === 'Enter') calculate();
+            if (e.key === 'Backspace') deleteLast();
+            if (e.key === 'Escape') clearCalc();
+        });
+
+        // ==========================================
+        // FUNCIONES DE IMC (AISLADAS)
+        // ==========================================
+        function selectGender(gender) {
+            imcState.selectedGender = gender;
+            document.getElementById('btnFemale').classList.remove('active');
+            document.getElementById('btnMale').classList.remove('active');
+            document.getElementById('btn' + (gender === 'female' ? 'Female' : 'Male')).classList.add('active');
+            
+            const resultDiv = document.getElementById('imcResult');
+            if (resultDiv.style.display !== 'none') {
+                resultDiv.className = 'imc-result ' + gender;
+            }
+            
+            calcularIMC();
+        }
+
+        function calcularIMC() {
+            const peso = parseFloat(document.getElementById('peso').value);
+            const alturaCm = parseFloat(document.getElementById('altura').value);
+            const t = translations[currentLang];
+            
+            if (!peso || !alturaCm || !imcState.selectedGender) {
+                document.getElementById('imcResult').style.display = 'none';
+                resetScale();
+                return;
+            }
+
+            const alturaM = alturaCm / 100;
+            const imc = peso / (alturaM * alturaM);
+            
+            const resultDiv = document.getElementById('imcResult');
+            resultDiv.className = 'imc-result ' + imcState.selectedGender;
+            resultDiv.style.display = 'block';
+            
+            document.getElementById('imcValor').textContent = imc.toFixed(1);
+            
+            let categoria = '';
+            let scaleId = '';
+            let rangoIdeal = '';
+            
+            if (imc < 18.5) {
+                categoria = t.categories.low;
+                scaleId = 'scale-bajo';
+                rangoIdeal = t.idealWeight.ideal + (18.5 * alturaM * alturaM).toFixed(1) + ' - ' + (24.9 * alturaM * alturaM).toFixed(1) + ' kg';
+            } else if (imc < 25) {
+                categoria = t.categories.normal;
+                scaleId = 'scale-normal';
+                rangoIdeal = t.idealWeight.excellent;
+            } else if (imc < 30) {
+                categoria = t.categories.over;
+                scaleId = 'scale-sobrepeso';
+                rangoIdeal = t.idealWeight.ideal + (22 * alturaM * alturaM).toFixed(1) + ' kg';
+            } else {
+                categoria = t.categories.obese;
+                scaleId = 'scale-obeso';
+                rangoIdeal = t.idealWeight.consult;
+            }
+            
+            document.getElementById('imcCategoria').textContent = categoria;
+            document.getElementById('idealWeight').textContent = rangoIdeal;
+            
+            resetScale();
+            document.getElementById(scaleId).classList.add('active');
+            
+            const infoBox = document.getElementById('infoBox');
+            if (imcState.selectedGender === 'female') {
+                infoBox.innerHTML = currentLang === 'es' ? 
+                    '<strong>💡 Para mujeres:</strong> El IMC óptimo suele estar entre 20-25. Las mujeres naturalmente tienen mayor porcentaje de grasa corporal esencial (hormonas, reproducción).' :
+                    '<strong>💡 For women:</strong> Optimal BMI is usually between 20-25. Women naturally have a higher percentage of essential body fat (hormones, reproduction).';
+            } else {
+                infoBox.innerHTML = currentLang === 'es' ? 
+                    '<strong>💡 Para hombres:</strong> El IMC óptimo suele estar entre 18.5-24.9. Los hombres suelen tener mayor masa muscular, lo que puede aumentar ligeramente el IMC de forma saludable.' :
+                    '<strong>💡 For men:</strong> Optimal BMI is usually between 18.5-24.9. Men typically have more muscle mass, which can slightly increase BMI in a healthy way.';
+            }
+        }
+
+        function resetScale() {
+            document.querySelectorAll('.scale-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        // ==========================================
+        // INICIALIZACIÓN
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar idioma
+            if (localStorage.getItem('language')) {
+                currentLang = localStorage.getItem('language');
+                document.getElementById('currentFlag').textContent = currentLang === 'es' ? '🇻🇪' : '🇺🇸';
+                document.getElementById('currentLangCode').textContent = currentLang === 'es' ? 'ES' : 'EN';
+                document.getElementById('optEs').classList.toggle('active', currentLang === 'es');
+                document.getElementById('optEn').classList.toggle('active', currentLang === 'en');
+                applyLanguage();
+            }
+            
+            // Iniciar carga de tasas
+            fetchRates();
+            
+            // Actualizar cada 5 minutos
+            setInterval(fetchRates, 5 * 60 * 1000);
+        });
+    </script>
+</body>
+</html>
